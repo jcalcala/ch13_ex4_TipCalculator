@@ -2,14 +2,18 @@ package com.murach.tipcalculator;
 
 import java.text.NumberFormat;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.app.Activity;
@@ -26,13 +30,17 @@ implements OnEditorActionListener, OnClickListener {
     private Button   percentDownButton;
     private TextView tipTextView;
     private TextView totalTextView;
+    private Button saveBillBtn;
     
     // define instance variables that should be saved
     private String billAmountString = "";
     private float tipPercent = .15f;
+    private float billAmount;
     
     // set up preferences
     private SharedPreferences prefs;
+
+    TipsDatabase tipsDB;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,11 +54,13 @@ implements OnEditorActionListener, OnClickListener {
         percentDownButton = (Button) findViewById(R.id.percentDownButton);
         tipTextView = (TextView) findViewById(R.id.tipTextView);
         totalTextView = (TextView) findViewById(R.id.totalTextView);
+        saveBillBtn = (Button) findViewById(R.id.saveBillBtn);
 
         // set the listeners
         billAmountEditText.setOnEditorActionListener(this);
         percentUpButton.setOnClickListener(this);
         percentDownButton.setOnClickListener(this);
+        saveBillBtn.setOnClickListener(this);
         
         // get default SharedPreferences object
         prefs = PreferenceManager.getDefaultSharedPreferences(this);        
@@ -80,6 +90,10 @@ implements OnEditorActionListener, OnClickListener {
         
         // calculate and display
         calculateAndDisplay();
+
+        if(tipsDB != null) {
+            Log.i("Saved Values", String.valueOf(tipsDB.getItem()));
+        }
     }
     
     public void calculateAndDisplay() {        
@@ -127,6 +141,8 @@ implements OnEditorActionListener, OnClickListener {
             tipPercent = tipPercent + .01f;
             calculateAndDisplay();
             break;
+        case R.id.saveBillBtn:
+            tipsDB.addBill(0, billAmount, tipPercent);
         }
     }
 }
